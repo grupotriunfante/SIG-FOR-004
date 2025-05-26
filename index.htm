@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gestão de Indicadores</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.08);
+        }
+
+        header {
+            background-color: #ffffff;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            color: #333;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        header img {
+            height: 50px;
+            margin: 0 10px;
+        }
+
+        header h1 {
+            font-size: 33px;
+            margin: 0;
+            text-align: center;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .subtitulo {
+            margin-left: auto;
+            margin-right: 10px;
+            font-weight: normal;
+            color: #332;
+            position: relative;
+        }
+
+        h2 {
+            margin-top: 30px;
+            color: #1c2b3a;
+            font-size: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 15px;
+            display: block;
+            font-size: 14px;
+        }
+
+        select, input[type="text"], textarea, input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            margin-top: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        .grafico-container {
+            margin-top: 30px;
+            padding: 20px;
+            border: 2px dashed #1c2b3a;
+            border-radius: 12px;
+            background: #fafafa;
+        }
+
+        #graficoIndicador {
+            max-height: 300px;
+        }
+
+        .analise-container {
+            margin-top: 30px;
+        }
+
+        .rich-text-area {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            min-height: 200px;
+            padding: 10px;
+            background-color: #fff;
+            margin-top: 6px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .rich-text-area:focus {
+            outline: 2px solid #1c2b3a;
+        }
+
+        .plano-acao {
+            margin-top: 30px;
+        }
+
+        .acao-individual {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .acao-individual input[type="text"],
+        .acao-individual input[type="date"] {
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        .acao-individual button {
+            background: #e3342f;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+
+        .acao-individual button:hover {
+            background-color: #c53030;
+        }
+
+        .copy-button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            margin-right: 10px;
+        }
+
+        .copy-button:hover {
+            background: #2563eb;
+        }
+
+        .actions-footer {
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        .message {
+            margin-top: 15px;
+            font-weight: 600;
+            color: green;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 13px;
+            color: #777;
+            margin-top: 60px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="http://i.imgur.com/Fln53Oi.png" alt="Logo do SIG">
+        <h1>Gestão de Indicadores</h1>
+        <h5 class="subtitulo">SIG-FOR-004</h5>
+    </header>
+
+    <div class="container">
+        <label for="unidade">Unidade:</label>
+        <select id="unidade">
+            <option value="">Selecione</option>
+            <option value="TCA">TCA</option>
+            <option value="MCD">MCD</option>
+            <option value="TCG">TCG</option>
+            <option value="TPA">TPA</option>
+            <option value="TBA">TBA</option>
+            <option value="TPH">TPH</option>
+            <option value="API">API</option>
+            <option value="TSJ">TSJ</option>
+            <option value="TCV">TCV</option>
+            <option value="ABC">ABC</option>
+            <option value="TBL">TBL</option>
+        </select>
+
+        <label for="indicador">Indicador:</label>
+        <select id="indicador">
+            <option value="">Selecione</option>
+            <option value="Faturamento">Faturamento Bruto</option>
+            <option value="FEFO">FEFO</option>
+            <option value="Devoluções">Devoluções</option>
+            <option value="Trocas">Trocas</option>
+            <option value="Inadimplência">Inadimplência</option>
+            <option value="Positivação">Positivação</option>
+            <option value="Despesas">Despesas</option>
+        </select>
+
+        <label for="responsavel">Responsável pelo indicador:</label>
+        <input type="text" id="responsavel" placeholder="Digite o nome do responsável" />
+
+        <label for="codigo">Código do Registro:</label>
+        <input type="text" id="codigo" readonly style="background-color:#f0f0f0; font-weight:bold;" />
+
+        <div class="grafico-container">
+            <h3 id="titulo-indicador">Selecione uma unidade e um indicador</h3>
+            <canvas id="graficoIndicador"></canvas>
+        </div>
+
+        <div class="analise-container">
+            <label>Estratificação e Análise dos Dados:</label>
+            <div class="rich-text-area" id="analise" contenteditable="true">
+                <p>Digite aqui sua análise ou cole uma imagem.</p>
+            </div>
+        </div>
+
+        <div class="plano-acao">
+            <label>Plano de Ação:</label>
+            <div class="acoes-cabecalho" style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px; font-weight: bold; padding: 5px 8px; border-bottom: 2px solid #ccc; margin-bottom: 10px;">
+                <div>Descrição da Ação</div>
+                <div>Responsável</div>
+                <div>Prazo</div>
+                <div></div>
+            </div>
+            <div id="acoesContainer"></div>
+            <button type="button" class="copy-button" onclick="adicionarAcao()">+ Adicionar Ação</button>
+        </div>
+
+        <div class="actions-footer">
+            <button type="button" class="copy-button" id="btnEnviar">📤 Enviar</button>
+        </div>
+
+        <div id="mensagem" class="message"></div>
+    </div>
+
+    <div class="footer">
+        SIG - Sistema Integrado de Gestão • Gestão de Indicadores
+    </div>
+
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+    <script>
+        const unidadeSelect = document.getElementById("unidade");
+        const senhasUnidades = {
+            "TCA": "senhaTCA123",
+            "MCD": "senhaMCD456",
+            "TCG": "senhaTCG789",
+            "TPA": "senhaTPA111",
+            "TBA": "senhaTBA222",
+            "TPH": "senhaTPH333",
+            "API": "senhaAPI444",
+            "TSJ": "senhaTSJ555",
+            "TCV": "senhaTCV666",
+            "ABC": "senhaABC777",
+            "TBL": "senhaTBL888"
+        };
+
+        unidadeSelect.addEventListener("change", function () {
+            const unidadeSelecionada = unidadeSelect.value;
+            if (!unidadeSelecionada) return; // Nada selecionado, só sair
+
+            const senhaDigitada = prompt(`Digite a senha para a unidade ${unidadeSelecionada}:`);
+
+            if (senhaDigitada === null) {
+                // Usuário cancelou o prompt, limpar seleção
+                unidadeSelect.value = "";
+                atualizarGrafico();
+                return;
+            }
+
+            if (senhaDigitada !== senhasUnidades[unidadeSelecionada]) {
+                alert("Senha incorreta! Selecione a unidade novamente.");
+                unidadeSelect.value = "";
+                atualizarGrafico();
+            } else {
+                // Senha correta, seguir normalmente
+                atualizarGrafico();
+            }
+        });
+
+        const indicadorSelect = document.getElementById("indicador");
+        const tituloIndicador = document.getElementById("titulo-indicador");
+        const analiseDiv = document.getElementById("analise");
+        const acoesContainer = document.getElementById("acoesContainer");
+        const mensagemDiv = document.getElementById("mensagem");
+        const btnEnviar = document.getElementById('btnEnviar');
+        let chartInstance;
+
+        const MESES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+            "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+        ];
+
+        const SUFIXOS = {
+            "Faturamento": "R$",
+            "Positivação": "Clientes",
+            "FEFO": "R$",
+            "Inadimplência": "R$",
+            "Despesas": "R$",
+            "Devoluções": "R$",
+            "Trocas": "R$"
+        };
+
+        function formatarMesAno(codigo) {
+            if (!codigo) return "Mês inválido";
+
+            // Supondo que `codigo` já é algo como "Maio/2025"
+            const partes = codigo.split("/");
+
+            if (partes.length !== 2) return "Mês inválido";
+
+            const mesNome = partes[0].trim();
+            const ano = partes[1].trim();
+
+            if (!ano.match(/^\d{4}$/)) return "Ano inválido";
+
+            // Verifica se o mês é um dos nomes válidos
+            if (!MESES.includes(mesNome)) return "Mês inválido";
+
+            return `${mesNome} / ${ano}`;
+        }
+
+        // URL para buscar dados do Apps Script (MANTIDA PARA O GRÁFICO)
+        async function fetchDados(indicador, unidade) {
+            const url = `https://script.google.com/macros/s/AKfycbwTeMgHqX726ENSaNflrIz_Dvr8pyDBtvBHsvCcDXtjPEoYCAt0qQnznqG11dGIQ0-q3Q/exec?indicador=${encodeURIComponent(indicador)}&unidade=${encodeURIComponent(unidade)}`;
+            const response = await fetch(url);
+            return await response.json();
+        }
+
+        async function atualizarGrafico() {
+            const unidade = unidadeSelect.value;
+            const indicador = indicadorSelect.value;
+            if (!unidade || !indicador) {
+                tituloIndicador.textContent = "Selecione uma unidade e um indicador";
+                if (chartInstance) {
+                    chartInstance.destroy();
+                    chartInstance = null;
+                }
+                return;
+            }
+
+            tituloIndicador.textContent = `${indicador} - ${unidade}`;
+            const dados = await fetchDados(indicador, unidade);
+
+            const labels = dados.map(d => formatarMesAno(d.mes));
+            const valores = dados.map(d => d.valor);
+            const metas = dados.map(d => d.meta);
+            const sufixo = SUFIXOS[indicador] || "";
+
+            const ctx = document.getElementById("graficoIndicador").getContext("2d");
+
+            if (chartInstance) chartInstance.destroy();
+
+            chartInstance = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: "Resultado",
+                            data: valores,
+                            backgroundColor: "#3b82f6"
+                        },
+                        {
+                            label: "Meta",
+                            data: metas,
+                            backgroundColor: "#f97316"
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        datalabels: {
+                            display: true,
+                            color: '#000',
+                            font: { weight: 'bold' },
+                            formatter: v => sufixo === "R$" ? "R$ " + v.toLocaleString("pt-BR") : v + " " + sufixo
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => {
+                                    const val = ctx.raw;
+                                    return `${ctx.dataset.label}: ${sufixo === "R$" ? "R$ " + val.toLocaleString("pt-BR") : val + " " + sufixo}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Meses' } },
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: sufixo === "R$" ? 'Valor (R$)' : sufixo },
+                            ticks: {
+                                callback: v => sufixo === "R$" ? "R$ " + v.toLocaleString("pt-BR") : v + " " + sufixo
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+
+        unidadeSelect.addEventListener("change", atualizarGrafico);
+        indicadorSelect.addEventListener("change", atualizarGrafico);
+
+        function adicionarAcao() {
+            const div = document.createElement("div");
+            div.className = "acao-individual";
+            div.innerHTML = `
+                <input type="text" class="desc-acao" name="descricao" placeholder="Descrição da ação" />
+                <input type="text" class="resp-acao" name="responsavel" placeholder="Responsável" />
+                <input type="date" class="prazo-acao" name="prazo" />
+                <button type="button" onclick="this.parentElement.remove()">🗑️</button>
+            `;
+            acoesContainer.appendChild(div);
+        }
+
+        // Geração do código GI-XXXXX
+        function gerarCodigoAutomatico() {
+            const prefixo = "GI-";
+            const numeroAleatorio = Math.floor(10000 + Math.random() * 90000);
+            const codigo = prefixo + numeroAleatorio;
+            document.getElementById("codigo").value = codigo;
+        }
+
+        // Executar quando a página carregar
+        window.addEventListener("DOMContentLoaded", gerarCodigoAutomatico);
+
+
+        // ***** NOVO CÓDIGO PARA ENVIO AO POWER AUTOMATE E CAPTURA DA IMAGEM *****
+
+        const powerAutomateUrl = 'https://prod-26.brazilsouth.logic.azure.com:443/workflows/bbd952955bdf48a2a8ef8b409a65dea2/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=JmoqT8g7ppL3N-wmEewJsU1c73S2e9oaoEYI4Kr-Xm0';
+
+        // Mudei o onclick do botão para um event listener no JS
+        btnEnviar.addEventListener('click', async function() {
+            mensagemDiv.textContent = 'Enviando formulário...';
+            mensagemDiv.className = 'message'; // Resetar classes de mensagem
+
+            const unidade = document.getElementById('unidade').value;
+            const indicador = document.getElementById('indicador').value;
+            const responsavel = document.getElementById('responsavel').value;
+            const codigo = document.getElementById('codigo').value;
+            const analiseContent = document.getElementById('analise').innerHTML; // Pega o HTML do div de análise
+
+            // Coleta as ações do plano de ação
+            const acoes = [];
+            document.querySelectorAll('.acao-individual').forEach(acaoDiv => {
+                acoes.push({
+                    descricao: acaoDiv.querySelector('.desc-acao').value,
+                    responsavel: acaoDiv.querySelector('.resp-acao').value,
+                    prazo: acaoDiv.querySelector('.prazo-acao').value
+                });
+            });
+
+            try {
+                // *** MUDANÇA AQUI: CAPTURANDO O CORPO INTEIRO DO DOCUMENTO (Opção 2) ***
+                const bodyForCapture = document.body; 
+                const bodyCanvas = await html2canvas(bodyForCapture, {
+                    useCORS: true,
+                    logging: false,
+                    // scrollY: -window.scrollY // Remova ou ajuste dependendo do seu layout e se houver scroll na página
+                });
+                let imageData = bodyCanvas.toDataURL('image/png', 1.0); // Captura o BODY como Base64 PNG
+
+                // Remova o prefixo 'data:image/png;base64,' se ele estiver presente
+                // Mantido, mesmo que base64ToBinary seja robusta, é boa prática limpar na origem
+                if (imageData.startsWith('data:image/png;base64,')) {
+                    imageData = imageData.substring('data:image/png;base64,'.length);
+                }
+
+                // Cria um nome de arquivo único para a imagem (agora é o print completo)
+                const timestamp = new Date().toISOString().replace(/[:.-]/g, '');
+                const imageFileName = `print_completo_${unidade || 'SemUnidade'}_${indicador || 'SemIndicador'}_${codigo || 'SemCodigo'}_${timestamp}.png`;
+
+
+                // Prepara os dados para enviar ao Power Automate
+                const formData = {
+                    unidade: unidade,
+                    indicador: indicador,
+                    responsavel: responsavel,
+                    codigo: codigo,
+                    analise: analiseContent, // Conteúdo HTML da análise
+                    acoes: acoes,
+                    imageData: imageData, // AGORA É O PRINT DO CORPO COMPLETO
+                    fileName: imageFileName // Novo nome de arquivo para o print completo
+                };
+
+                // Enviar para o Power Automate
+                const response = await fetch(powerAutomateUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) { // Verifica se a resposta HTTP é 2xx (sucesso)
+                    if (result.success) {
+                        mensagemDiv.textContent = result.message;
+                        mensagemDiv.className = 'message success'; // Adiciona classe de sucesso
+                        // Aqui você pode adicionar lógica para limpar o formulário
+                        // limparFormulario(); // Chame esta função se criá-la
+                        gerarCodigoAutomatico(); // Gera um novo código para o próximo envio
+                    } else {
+                        mensagemDiv.textContent = `Erro ao enviar formulário: ${result.message || JSON.stringify(result)}`;
+                        mensagemDiv.className = 'message error'; // Adiciona classe de erro
+                    }
+                } else {
+                    // Erro no lado do servidor (ex: 400, 500)
+                    mensagemDiv.textContent = `Erro HTTP (${response.status}) ao enviar formulário: ${result.message || JSON.stringify(result)}`;
+                    mensagemDiv.className = 'message error';
+                }
+
+            } catch (error) {
+                console.error('Erro ao enviar formulário:', error);
+                mensagemDiv.textContent = `Erro ao enviar formulário: ${error.message || error}`;
+                mensagemDiv.className = 'message error';
+            }
+        });
+
+        // Removi a função salvarAnalise() antiga, pois o novo event listener no btnEnviar a substitui.
+        // Se você tinha alguma lógica específica em salvarAnalise() além do envio, recoloque-a no event listener.
+
+        // Exemplo de função para limpar o formulário (descomente e use se desejar)
+        /*
+        function limparFormulario() {
+            document.getElementById('unidade').value = '';
+            document.getElementById('indicador').value = '';
+            document.getElementById('responsavel').value = '';
+            document.getElementById('analise').innerHTML = '<p>Digite aqui sua análise ou cole uma imagem.</p>';
+            acoesContainer.innerHTML = ''; // Limpa as ações
+            if (chartInstance) chartInstance.destroy(); // Destroi o gráfico
+            chartInstance = null;
+            tituloIndicador.textContent = "Selecione uma unidade e um indicador";
+        }
+        */
+
+    </script>
+</body>
+</html>
