@@ -6,6 +6,7 @@
     <title>Gestão de Indicadores</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -255,7 +256,6 @@
         <div class="actions-footer">
             <button type="button" class="copy-button" id="btnEnviar">📤 Enviar</button>
         </div>
-
         <div id="mensagem" class="message"></div>
     </div>
 
@@ -286,7 +286,6 @@
             if (!unidadeSelecionada) return; // Nada selecionado, só sair
 
             const senhaDigitada = prompt(`Digite a senha para a unidade ${unidadeSelecionada}:`);
-
             if (senhaDigitada === null) {
                 // Usuário cancelou o prompt, limpar seleção
                 unidadeSelect.value = "";
@@ -338,7 +337,6 @@
             const ano = partes[1].trim();
 
             if (!ano.match(/^\d{4}$/)) return "Ano inválido";
-
             // Verifica se o mês é um dos nomes válidos
             if (!MESES.includes(mesNome)) return "Mês inválido";
 
@@ -434,9 +432,9 @@
             const div = document.createElement("div");
             div.className = "acao-individual";
             div.innerHTML = `
-                <input type="text" class="desc-acao" name="descricao" placeholder="Descrição da ação" />
-                <input type="text" class="resp-acao" name="responsavel" placeholder="Responsável" />
-                <input type="date" class="prazo-acao" name="prazo" />
+                <input type="text" class="desc-acao" name="descricao" placeholder="Descrição da ação" required />
+                <input type="text" class="resp-acao" name="responsavel" placeholder="Responsável" required />
+                <input type="date" class="prazo-acao" name="prazo" required />
                 <button type="button" onclick="this.parentElement.remove()">🗑️</button>
             `;
             acoesContainer.appendChild(div);
@@ -453,12 +451,86 @@
         // Executar quando a página carregar
         window.addEventListener("DOMContentLoaded", gerarCodigoAutomatico);
 
-
         // ***** NOVO CÓDIGO PARA ENVIO AO POWER AUTOMATE E CAPTURA DA IMAGEM *****
-
         const powerAutomateUrl = 'https://prod-26.brazilsouth.logic.azure.com:443/workflows/bbd952955bdf48a2a8ef8b409a65dea2/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=JmoqT8g7ppL3N-wmEewJsU1c73S2e9oaoEYI4Kr-Xm0';
 
-        // Mudei o onclick do botão para um event listener no JS
+        // Função para gerar e baixar o arquivo Excel
+        function gerarEBaixarExcel(dadosFormulario) {
+            const wb = XLSX.utils.book_new(); // Cria um novo workbook
+            const ws_data = []; // Array para os dados da planilha
+
+            // Cabeçalho da planilha
+            ws_data.push(["Campo", "Valor"]);
+
+            // Adicionar dados do formulário principal
+            ws_data.push(["Unidade", dadosFormulario.unidade]);
+            ws_data.push(["Indicador", dadosFormulario.indicador]);
+            ws_data.push(["Responsável", dadosFormulario.responsavel]);
+            ws_data.push(["Código do Registro", dadosFormulario.codigo]);
+            // Remover tags HTML do conteúdo da análise para o Excel
+            const analiseTexto = dadosFormulario.analise.replace(/<[^>]*>?/gm, '');
+            ws_data.push(["Análise dos Dados", analiseTexto]);
+
+            // Adicionar um separador para o Plano de Ação
+            ws_data.push([]); // Linha em branco
+            ws_data.push(["Plano de Ação"]);
+            ws_data.push(["Descrição da Ação", "Responsável", "Prazo"]);
+
+            // Adicionar dados do Plano de Ação
+            if (dadosFormulario.acoes && dadosFormulario.acoes.length > 0) {
+                dadosFormulario.acoes.forEach(acao => {
+                    ws_data.push([acao.descricao, acao.responsavel, acao.prazo]);
+                });
+            } else {
+                ws_data.push(["Nenhuma ação adicionada."]);
+            }
+
+            // Criar uma planilha a partir do array de dados
+            const ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+            // Adicionar estilos (opcional, requer xlsx-js-style)
+            // Note: O SheetJS puro pode ter suporte limitado a estilos em comparação com xlsx-js-style.
+            // Para estilos mais avançados, seria necessário um fork do SheetJS como o xlsx-js-style
+            // ou uma configuração mais complexa. Para o básico (negrito), o SheetJS deve funcionar.
+            if (ws['A1']) ws['A1'].s = { font: { bold: true } };
+            if (ws['B1']) ws['B1'].s = { font: { bold: true } };
+            if (ws['A7']) ws['A7'].s = { font: { bold: true } }; // Plano de Ação header
+            if (ws['A8']) ws['A8'].s = { font: { bold: true } }; // Descrição da Ação header
+            if (ws['B8']) ws['B8'].s = { font: { bold: true } }; // Responsável header
+            if (ws['C8']) ws['C8'].s = { font: { bold: true } }; // Prazo header
+
+
+            // Definir largura das colunas (opcional)
+            const wscols = [
+                {wch: 30}, // "Campo" / "Descrição da Ação"
+                {wch: 40}, // "Valor" / "Responsável"
+                {wch: 15}  // "Prazo"
+            ];
+            ws['!cols'] = wscols;
+
+            // Adicionar a planilha ao workbook
+            XLSX.utils.book_append_sheet(wb, ws, "Dados do Formulário");
+
+            // Gerar o arquivo e iniciar o download
+            const fileName = `Dados_Indicadores_${dadosFormulario.codigo}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        }
+
+        // Função para limpar o formulário
+        function limparFormulario() {
+            document.getElementById('unidade').value = '';
+            document.getElementById('indicador').value = '';
+            document.getElementById('responsavel').value = '';
+            document.getElementById('analise').innerHTML = '<p>Digite aqui sua análise ou cole uma imagem.</p>';
+            acoesContainer.innerHTML = ''; // Limpa as ações
+            if (chartInstance) chartInstance.destroy(); // Destroi o gráfico
+            chartInstance = null;
+            tituloIndicador.textContent = "Selecione uma unidade e um indicador";
+            mensagemDiv.textContent = ''; // Limpa a mensagem
+            mensagemDiv.className = 'message'; // Reseta a classe da mensagem
+            gerarCodigoAutomatico(); // Gera um novo código após a limpeza
+        }
+
         btnEnviar.addEventListener('click', async function() {
             mensagemDiv.textContent = 'Enviando formulário...';
             mensagemDiv.className = 'message'; // Resetar classes de mensagem
@@ -467,7 +539,7 @@
             const indicador = document.getElementById('indicador').value;
             const responsavel = document.getElementById('responsavel').value;
             const codigo = document.getElementById('codigo').value;
-            const analiseContent = document.getElementById('analise').innerHTML; // Pega o HTML do div de análise
+            const analiseContent = document.getElementById('analise').innerHTML;
 
             // Coleta as ações do plano de ação
             const acoes = [];
@@ -479,40 +551,79 @@
                 });
             });
 
-            try {
-                // *** MUDANÇA AQUI: CAPTURANDO O CORPO INTEIRO DO DOCUMENTO (Opção 2) ***
-                const bodyForCapture = document.body; 
-                const bodyCanvas = await html2canvas(bodyForCapture, {
-                    useCORS: true,
-                    logging: false,
-                    // scrollY: -window.scrollY // Remova ou ajuste dependendo do seu layout e se houver scroll na página
-                });
-                let imageData = bodyCanvas.toDataURL('image/png', 1.0); // Captura o BODY como Base64 PNG
+            // --- VALIDAÇÃO DE CAMPOS ---
+            if (!unidade) {
+                mensagemDiv.textContent = 'Por favor, selecione a Unidade.';
+                mensagemDiv.className = 'message error';
+                return;
+            }
+            if (!indicador) {
+                mensagemDiv.textContent = 'Por favor, selecione o Indicador.';
+                mensagemDiv.className = 'message error';
+                return;
+            }
+            if (!responsavel.trim()) {
+                mensagemDiv.textContent = 'Por favor, preencha o Responsável pelo indicador.';
+                mensagemDiv.className = 'message error';
+                return;
+            }
+            // Verifica se o rich-text-area de análise tem conteúdo além do placeholder inicial
+            if (analiseContent.trim() === '<p>Digite aqui sua análise ou cole uma imagem.</p>' || analiseContent.trim() === '') {
+                mensagemDiv.textContent = 'Por favor, preencha a Análise dos Dados.';
+                mensagemDiv.className = 'message error';
+                return;
+            }
 
-                // Remova o prefixo 'data:image/png;base64,' se ele estiver presente
-                // Mantido, mesmo que base64ToBinary seja robusta, é boa prática limpar na origem
-                if (imageData.startsWith('data:image/png;base64,')) {
-                    imageData = imageData.substring('data:image/png;base64,'.length);
+            // Validação do plano de ação
+            if (acoes.length === 0) {
+                mensagemDiv.textContent = 'Por favor, adicione pelo menos uma Ação ao Plano de Ação.';
+                mensagemDiv.className = 'message error';
+                return;
+            }
+            for (const acao of acoes) {
+                if (!acao.descricao.trim() || !acao.responsavel.trim() || !acao.prazo.trim()) {
+                    mensagemDiv.textContent = 'Por favor, preencha todos os campos do Plano de Ação (Descrição, Responsável, Prazo).';
+                    mensagemDiv.className = 'message error';
+                    return;
                 }
+            }
+            // --- FIM DA VALIDAÇÃO ---
 
-                // Cria um nome de arquivo único para a imagem (agora é o print completo)
-                const timestamp = new Date().toISOString().replace(/[:.-]/g, '');
-                const imageFileName = `print_completo_${unidade || 'SemUnidade'}_${indicador || 'SemIndicador'}_${codigo || 'SemCodigo'}_${timestamp}.png`;
-
-
-                // Prepara os dados para enviar ao Power Automate
+            try {
+                // Prepara os dados para o Excel e Power Automate
                 const formData = {
                     unidade: unidade,
                     indicador: indicador,
                     responsavel: responsavel,
                     codigo: codigo,
                     analise: analiseContent, // Conteúdo HTML da análise
-                    acoes: acoes,
-                    imageData: imageData, // AGORA É O PRINT DO CORPO COMPLETO
-                    fileName: imageFileName // Novo nome de arquivo para o print completo
+                    acoes: acoes
                 };
 
-                // Enviar para o Power Automate
+                // 1. Gerar e baixar o arquivo Excel
+                gerarEBaixarExcel(formData);
+                mensagemDiv.textContent = 'Formulário enviado com sucesso';
+
+                // 2. Capturar o corpo inteiro do documento para o Power Automate
+                const bodyForCapture = document.body;
+                const bodyCanvas = await html2canvas(bodyForCapture, {
+                    useCORS: true,
+                    logging: false,
+                });
+                let imageData = bodyCanvas.toDataURL('image/png', 1.0); // Captura o BODY como Base64 PNG
+
+                if (imageData.startsWith('data:image/png;base64,')) {
+                    imageData = imageData.substring('data:image/png;base64,'.length);
+                }
+
+                const timestamp = new Date().toISOString().replace(/[:.-]/g, '');
+                const imageFileName = `print_completo_${unidade || 'SemUnidade'}_${indicador || 'SemIndicador'}_${codigo || 'SemCodigo'}_${timestamp}.png`;
+
+                // Adiciona os dados da imagem ao formData para envio ao Power Automate
+                formData.imageData = imageData;
+                formData.fileName = imageFileName;
+
+                // 3. Enviar para o Power Automate
                 const response = await fetch(powerAutomateUrl, {
                     method: 'POST',
                     headers: {
@@ -525,11 +636,10 @@
 
                 if (response.ok) { // Verifica se a resposta HTTP é 2xx (sucesso)
                     if (result.success) {
-                        mensagemDiv.textContent = result.message;
+                        mensagemDiv.textContent = `Formulário enviado com sucesso e arquivo Excel baixado!`;
                         mensagemDiv.className = 'message success'; // Adiciona classe de sucesso
-                        // Aqui você pode adicionar lógica para limpar o formulário
-                        // limparFormulario(); // Chame esta função se criá-la
-                        gerarCodigoAutomatico(); // Gera um novo código para o próximo envio
+                        // 4. Limpar o formulário após o envio bem-sucedido
+                        limparFormulario();
                     } else {
                         mensagemDiv.textContent = `Erro ao enviar formulário: ${result.message || JSON.stringify(result)}`;
                         mensagemDiv.className = 'message error'; // Adiciona classe de erro
@@ -546,24 +656,6 @@
                 mensagemDiv.className = 'message error';
             }
         });
-
-        // Removi a função salvarAnalise() antiga, pois o novo event listener no btnEnviar a substitui.
-        // Se você tinha alguma lógica específica em salvarAnalise() além do envio, recoloque-a no event listener.
-
-        // Exemplo de função para limpar o formulário (descomente e use se desejar)
-        /*
-        function limparFormulario() {
-            document.getElementById('unidade').value = '';
-            document.getElementById('indicador').value = '';
-            document.getElementById('responsavel').value = '';
-            document.getElementById('analise').innerHTML = '<p>Digite aqui sua análise ou cole uma imagem.</p>';
-            acoesContainer.innerHTML = ''; // Limpa as ações
-            if (chartInstance) chartInstance.destroy(); // Destroi o gráfico
-            chartInstance = null;
-            tituloIndicador.textContent = "Selecione uma unidade e um indicador";
-        }
-        */
-
     </script>
 </body>
 </html>
