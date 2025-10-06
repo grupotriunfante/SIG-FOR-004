@@ -15,7 +15,6 @@
             background-color: #f4f6f9;
             color: #333;
         }
-
         .container {
             max-width: 1000px;
             margin: 40px auto;
@@ -24,7 +23,6 @@
             border-radius: 12px;
             box-shadow: 0 0 10px rgba(0,0,0,0.08);
         }
-
         header {
             background-color: #ffffff;
             padding: 10px;
@@ -35,12 +33,10 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
             position: relative;
         }
-
         header img {
             height: 50px;
             margin: 0 10px;
         }
-
         header h1 {
             font-size: 33px;
             margin: 0;
@@ -49,7 +45,6 @@
             left: 50%;
             transform: translateX(-50%);
         }
-
         .subtitulo {
             margin-left: auto;
             margin-right: 10px;
@@ -57,20 +52,17 @@
             color: #332;
             position: relative;
         }
-
         h2 {
             margin-top: 30px;
             color: #1c2b3a;
             font-size: 20px;
         }
-
         label {
             font-weight: bold;
             margin-top: 15px;
             display: block;
             font-size: 14px;
         }
-
         select, input[type="text"], textarea, input[type="date"] {
             width: 100%;
             padding: 10px;
@@ -80,11 +72,9 @@
             font-size: 14px;
             box-sizing: border-box;
         }
-
         textarea {
             resize: vertical;
         }
-
         .grafico-container {
             margin-top: 30px;
             padding: 20px;
@@ -92,15 +82,12 @@
             border-radius: 12px;
             background: #fafafa;
         }
-
         #graficoIndicador {
             max-height: 300px;
         }
-
         .analise-container {
             margin-top: 30px;
         }
-
         .rich-text-area {
             border: 1px solid #ccc;
             border-radius: 8px;
@@ -111,15 +98,12 @@
             font-size: 14px;
             line-height: 1.5;
         }
-
         .rich-text-area:focus {
             outline: 2px solid #1c2b3a;
         }
-
         .plano-acao {
             margin-top: 30px;
         }
-
         .acao-individual {
             display: grid;
             grid-template-columns: 2fr 1fr 1fr auto;
@@ -127,14 +111,22 @@
             margin-bottom: 10px;
             align-items: center;
         }
-
         .acao-individual input[type="text"],
-        .acao-individual input[type="date"] {
+        .acao-individual input[type="date"],
+        .acao-individual textarea {
             padding: 8px;
             border-radius: 6px;
             border: 1px solid #ccc;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 14px;
         }
-
+        /* ALTERAÇÃO AQUI: CSS para o crescimento automático */
+        .acao-individual textarea {
+            resize: none; /* Remove a alça de redimensionamento manual */
+            overflow-y: hidden; /* Esconde a barra de rolagem que pode aparecer brevemente */
+            min-height: 38px; /* Altura inicial similar a um input */
+            line-height: 1.4;
+        }
         .acao-individual button {
             background: #e3342f;
             color: white;
@@ -143,11 +135,9 @@
             padding: 8px 12px;
             cursor: pointer;
         }
-
         .acao-individual button:hover {
             background-color: #c53030;
         }
-
         .copy-button {
             background: #3b82f6;
             color: white;
@@ -159,26 +149,21 @@
             margin-top: 10px;
             margin-right: 10px;
         }
-
         .copy-button:hover {
             background: #2563eb;
         }
-
         .actions-footer {
             margin-top: 20px;
             text-align: right;
         }
-
         .message {
             margin-top: 15px;
             font-weight: 600;
             color: green;
         }
-
         .error {
             color: red;
         }
-
         .footer {
             text-align: center;
             font-size: 13px;
@@ -264,41 +249,29 @@
     </div>
 
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-
     <script>
         const unidadeSelect = document.getElementById("unidade");
         const senhasUnidades = {
-            "TCA": "senhaTCA123",
-            "MCD": "senhaMCD456",
-            "TCG": "senhaTCG789",
-            "TPA": "senhaTPA111",
-            "TBA": "senhaTBA222",
-            "TPH": "senhaTPH333",
-            "API": "senhaAPI444",
-            "TSJ": "senhaTSJ555",
-            "TCV": "senhaTCV666",
-            "ABC": "senhaABC777",
-            "TBL": "senhaTBL888"
+            "TCA": "senhaTCA123", "MCD": "senhaMCD456", "TCG": "senhaTCG789",
+            "TPA": "senhaTPA111", "TBA": "senhaTBA222", "TPH": "senhaTPH333",
+            "API": "senhaAPI444", "TSJ": "senhaTSJ555", "TCV": "senhaTCV666",
+            "ABC": "senhaABC777", "TBL": "senhaTBL888"
         };
 
         unidadeSelect.addEventListener("change", function () {
             const unidadeSelecionada = unidadeSelect.value;
-            if (!unidadeSelecionada) return; // Nada selecionado, só sair
-
+            if (!unidadeSelecionada) return;
             const senhaDigitada = prompt(`Digite a senha para a unidade ${unidadeSelecionada}:`);
             if (senhaDigitada === null) {
-                // Usuário cancelou o prompt, limpar seleção
                 unidadeSelect.value = "";
                 atualizarGrafico();
                 return;
             }
-
             if (senhaDigitada !== senhasUnidades[unidadeSelecionada]) {
                 alert("Senha incorreta! Selecione a unidade novamente.");
                 unidadeSelect.value = "";
                 atualizarGrafico();
             } else {
-                // Senha correta, seguir normalmente
                 atualizarGrafico();
             }
         });
@@ -312,38 +285,24 @@
         let chartInstance;
 
         const MESES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-            "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
-        ];
+            "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 
         const SUFIXOS = {
-            "Faturamento": "R$",
-            "Positivação": "Clientes",
-            "FEFO": "R$",
-            "Inadimplência": "R$",
-            "Despesas": "R$",
-            "Devoluções": "R$",
-            "Trocas": "R$"
+            "Faturamento": "R$", "Positivação": "Clientes", "FEFO": "R$",
+            "Inadimplência": "R$", "Despesas": "R$", "Devoluções": "R$", "Trocas": "R$"
         };
 
         function formatarMesAno(codigo) {
             if (!codigo) return "Mês inválido";
-
-            // Supondo que `codigo` já é algo como "Maio/2025"
             const partes = codigo.split("/");
-
             if (partes.length !== 2) return "Mês inválido";
-
             const mesNome = partes[0].trim();
             const ano = partes[1].trim();
-
             if (!ano.match(/^\d{4}$/)) return "Ano inválido";
-            // Verifica se o mês é um dos nomes válidos
             if (!MESES.includes(mesNome)) return "Mês inválido";
-
             return `${mesNome} / ${ano}`;
         }
 
-        // URL para buscar dados do Apps Script (MANTIDA PARA O GRÁFICO)
         async function fetchDados(indicador, unidade) {
             const url = `https://script.google.com/macros/s/AKfycbwTeMgHqX726ENSaNflrIz_Dvr8pyDBtvBHsvCcDXtjPEoYCAt0qQnznqG11dGIQ0-q3Q/exec?indicador=${encodeURIComponent(indicador)}&unidade=${encodeURIComponent(unidade)}`;
             const response = await fetch(url);
@@ -361,17 +320,13 @@
                 }
                 return;
             }
-
             tituloIndicador.textContent = `${indicador} - ${unidade}`;
             const dados = await fetchDados(indicador, unidade);
-
             const labels = dados.map(d => formatarMesAno(d.mes));
             const valores = dados.map(d => d.valor);
             const metas = dados.map(d => d.meta);
             const sufixo = SUFIXOS[indicador] || "";
-
             const ctx = document.getElementById("graficoIndicador").getContext("2d");
-
             if (chartInstance) chartInstance.destroy();
 
             chartInstance = new Chart(ctx, {
@@ -379,16 +334,8 @@
                 data: {
                     labels,
                     datasets: [
-                        {
-                            label: "Resultado",
-                            data: valores,
-                            backgroundColor: "#3b82f6"
-                        },
-                        {
-                            label: "Meta",
-                            data: metas,
-                            backgroundColor: "#f97316"
-                        }
+                        { label: "Resultado", data: valores, backgroundColor: "#3b82f6" },
+                        { label: "Meta", data: metas, backgroundColor: "#f97316" }
                     ]
                 },
                 options: {
@@ -396,9 +343,7 @@
                     plugins: {
                         legend: { position: 'top' },
                         datalabels: {
-                            display: true,
-                            color: '#000',
-                            font: { weight: 'bold' },
+                            display: true, color: '#000', font: { weight: 'bold' },
                             formatter: v => sufixo === "R$" ? "R$ " + v.toLocaleString("pt-BR") : v + " " + sufixo
                         },
                         tooltip: {
@@ -432,7 +377,7 @@
             const div = document.createElement("div");
             div.className = "acao-individual";
             div.innerHTML = `
-                <input type="text" class="desc-acao" name="descricao" placeholder="Descrição da ação" required />
+                <textarea class="desc-acao" name="descricao" placeholder="Descrição da ação" required rows="1"></textarea>
                 <input type="text" class="resp-acao" name="responsavel" placeholder="Responsável" required />
                 <input type="date" class="prazo-acao" name="prazo" required />
                 <button type="button" onclick="this.parentElement.remove()">🗑️</button>
@@ -440,43 +385,40 @@
             acoesContainer.appendChild(div);
         }
 
-        // Geração do código GI-XXXXX
+        // NOVO CÓDIGO AQUI: Função para auto-ajuste da altura da textarea
+        acoesContainer.addEventListener('input', function(event) {
+            // Verifica se o evento foi disparado por uma textarea de descrição de ação
+            if (event.target.tagName.toLowerCase() === 'textarea' && event.target.classList.contains('desc-acao')) {
+                const textarea = event.target;
+                textarea.style.height = 'auto'; // Reseta a altura para calcular corretamente o scrollHeight
+                textarea.style.height = (textarea.scrollHeight) + 'px'; // Ajusta a altura para o conteúdo
+            }
+        });
+
+
         function gerarCodigoAutomatico() {
             const prefixo = "GI-";
             const numeroAleatorio = Math.floor(10000 + Math.random() * 90000);
-            const codigo = prefixo + numeroAleatorio;
-            document.getElementById("codigo").value = codigo;
+            document.getElementById("codigo").value = prefixo + numeroAleatorio;
         }
 
-        // Executar quando a página carregar
         window.addEventListener("DOMContentLoaded", gerarCodigoAutomatico);
 
-        // ***** NOVO CÓDIGO PARA ENVIO AO POWER AUTOMATE E CAPTURA DA IMAGEM *****
         const powerAutomateUrl = 'https://prod-26.brazilsouth.logic.azure.com:443/workflows/bbd952955bdf48a2a8ef8b409a65dea2/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=JmoqT8g7ppL3N-wmEewJsU1c73S2e9oaoEYI4Kr-Xm0';
 
-        // Função para gerar e baixar o arquivo Excel
         function gerarEBaixarExcel(dadosFormulario) {
-            const wb = XLSX.utils.book_new(); // Cria um novo workbook
-            const ws_data = []; // Array para os dados da planilha
-
-            // Cabeçalho da planilha
+            const wb = XLSX.utils.book_new();
+            const ws_data = [];
             ws_data.push(["Campo", "Valor"]);
-
-            // Adicionar dados do formulário principal
             ws_data.push(["Unidade", dadosFormulario.unidade]);
             ws_data.push(["Indicador", dadosFormulario.indicador]);
             ws_data.push(["Responsável", dadosFormulario.responsavel]);
             ws_data.push(["Código do Registro", dadosFormulario.codigo]);
-            // Remover tags HTML do conteúdo da análise para o Excel
             const analiseTexto = dadosFormulario.analise.replace(/<[^>]*>?/gm, '');
             ws_data.push(["Análise dos Dados", analiseTexto]);
-
-            // Adicionar um separador para o Plano de Ação
-            ws_data.push([]); // Linha em branco
+            ws_data.push([]);
             ws_data.push(["Plano de Ação"]);
             ws_data.push(["Descrição da Ação", "Responsável", "Prazo"]);
-
-            // Adicionar dados do Plano de Ação
             if (dadosFormulario.acoes && dadosFormulario.acoes.length > 0) {
                 dadosFormulario.acoes.forEach(acao => {
                     ws_data.push([acao.descricao, acao.responsavel, acao.prazo]);
@@ -484,64 +426,43 @@
             } else {
                 ws_data.push(["Nenhuma ação adicionada."]);
             }
-
-            // Criar uma planilha a partir do array de dados
             const ws = XLSX.utils.aoa_to_sheet(ws_data);
-
-            // Adicionar estilos (opcional, requer xlsx-js-style)
-            // Note: O SheetJS puro pode ter suporte limitado a estilos em comparação com xlsx-js-style.
-            // Para estilos mais avançados, seria necessário um fork do SheetJS como o xlsx-js-style
-            // ou uma configuração mais complexa. Para o básico (negrito), o SheetJS deve funcionar.
             if (ws['A1']) ws['A1'].s = { font: { bold: true } };
             if (ws['B1']) ws['B1'].s = { font: { bold: true } };
-            if (ws['A7']) ws['A7'].s = { font: { bold: true } }; // Plano de Ação header
-            if (ws['A8']) ws['A8'].s = { font: { bold: true } }; // Descrição da Ação header
-            if (ws['B8']) ws['B8'].s = { font: { bold: true } }; // Responsável header
-            if (ws['C8']) ws['C8'].s = { font: { bold: true } }; // Prazo header
-
-
-            // Definir largura das colunas (opcional)
-            const wscols = [
-                {wch: 30}, // "Campo" / "Descrição da Ação"
-                {wch: 40}, // "Valor" / "Responsável"
-                {wch: 15}  // "Prazo"
-            ];
+            if (ws['A7']) ws['A7'].s = { font: { bold: true } };
+            if (ws['A8']) ws['A8'].s = { font: { bold: true } };
+            if (ws['B8']) ws['B8'].s = { font: { bold: true } };
+            if (ws['C8']) ws['C8'].s = { font: { bold: true } };
+            const wscols = [{ wch: 30 }, { wch: 40 }, { wch: 15 }];
             ws['!cols'] = wscols;
-
-            // Adicionar a planilha ao workbook
             XLSX.utils.book_append_sheet(wb, ws, "Dados do Formulário");
-
-            // Gerar o arquivo e iniciar o download
             const fileName = `Dados_Indicadores_${dadosFormulario.codigo}.xlsx`;
             XLSX.writeFile(wb, fileName);
         }
 
-        // Função para limpar o formulário
         function limparFormulario() {
             document.getElementById('unidade').value = '';
             document.getElementById('indicador').value = '';
             document.getElementById('responsavel').value = '';
             document.getElementById('analise').innerHTML = '<p>Digite aqui sua análise ou cole uma imagem.</p>';
-            acoesContainer.innerHTML = ''; // Limpa as ações
-            if (chartInstance) chartInstance.destroy(); // Destroi o gráfico
+            acoesContainer.innerHTML = '';
+            if (chartInstance) chartInstance.destroy();
             chartInstance = null;
             tituloIndicador.textContent = "Selecione uma unidade e um indicador";
-            mensagemDiv.textContent = ''; // Limpa a mensagem
-            mensagemDiv.className = 'message'; // Reseta a classe da mensagem
-            gerarCodigoAutomatico(); // Gera um novo código após a limpeza
+            mensagemDiv.textContent = '';
+            mensagemDiv.className = 'message';
+            gerarCodigoAutomatico();
         }
 
-        btnEnviar.addEventListener('click', async function() {
+        btnEnviar.addEventListener('click', async function () {
             mensagemDiv.textContent = 'Enviando formulário...';
-            mensagemDiv.className = 'message'; // Resetar classes de mensagem
+            mensagemDiv.className = 'message';
 
             const unidade = document.getElementById('unidade').value;
             const indicador = document.getElementById('indicador').value;
             const responsavel = document.getElementById('responsavel').value;
             const codigo = document.getElementById('codigo').value;
             const analiseContent = document.getElementById('analise').innerHTML;
-
-            // Coleta as ações do plano de ação
             const acoes = [];
             document.querySelectorAll('.acao-individual').forEach(acaoDiv => {
                 acoes.push({
@@ -551,7 +472,6 @@
                 });
             });
 
-            // --- VALIDAÇÃO DE CAMPOS ---
             if (!unidade) {
                 mensagemDiv.textContent = 'Por favor, selecione a Unidade.';
                 mensagemDiv.className = 'message error';
@@ -567,14 +487,11 @@
                 mensagemDiv.className = 'message error';
                 return;
             }
-            // Verifica se o rich-text-area de análise tem conteúdo além do placeholder inicial
             if (analiseContent.trim() === '<p>Digite aqui sua análise ou cole uma imagem.</p>' || analiseContent.trim() === '') {
                 mensagemDiv.textContent = 'Por favor, preencha a Análise dos Dados.';
                 mensagemDiv.className = 'message error';
                 return;
             }
-
-            // Validação do plano de ação
             if (acoes.length === 0) {
                 mensagemDiv.textContent = 'Por favor, adicione pelo menos uma Ação ao Plano de Ação.';
                 mensagemDiv.className = 'message error';
@@ -587,69 +504,51 @@
                     return;
                 }
             }
-            // --- FIM DA VALIDAÇÃO ---
 
             try {
-                // Prepara os dados para o Excel e Power Automate
                 const formData = {
                     unidade: unidade,
                     indicador: indicador,
                     responsavel: responsavel,
                     codigo: codigo,
-                    analise: analiseContent, // Conteúdo HTML da análise
+                    analise: analiseContent,
                     acoes: acoes
                 };
 
-                // 1. Gerar e baixar o arquivo Excel
                 gerarEBaixarExcel(formData);
                 mensagemDiv.textContent = 'Formulário enviado com sucesso';
 
-                // 2. Capturar o corpo inteiro do documento para o Power Automate
                 const bodyForCapture = document.body;
-                const bodyCanvas = await html2canvas(bodyForCapture, {
-                    useCORS: true,
-                    logging: false,
-                });
-                let imageData = bodyCanvas.toDataURL('image/png', 1.0); // Captura o BODY como Base64 PNG
-
+                const bodyCanvas = await html2canvas(bodyForCapture, { useCORS: true, logging: false });
+                let imageData = bodyCanvas.toDataURL('image/png', 1.0);
                 if (imageData.startsWith('data:image/png;base64,')) {
                     imageData = imageData.substring('data:image/png;base64,'.length);
                 }
-
                 const timestamp = new Date().toISOString().replace(/[:.-]/g, '');
                 const imageFileName = `print_completo_${unidade || 'SemUnidade'}_${indicador || 'SemIndicador'}_${codigo || 'SemCodigo'}_${timestamp}.png`;
-
-                // Adiciona os dados da imagem ao formData para envio ao Power Automate
                 formData.imageData = imageData;
                 formData.fileName = imageFileName;
 
-                // 3. Enviar para o Power Automate
                 const response = await fetch(powerAutomateUrl, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formData)
                 });
-
                 const result = await response.json();
 
-                if (response.ok) { // Verifica se a resposta HTTP é 2xx (sucesso)
+                if (response.ok) {
                     if (result.success) {
                         mensagemDiv.textContent = `Formulário enviado com sucesso e arquivo Excel baixado!`;
-                        mensagemDiv.className = 'message success'; // Adiciona classe de sucesso
-                        // 4. Limpar o formulário após o envio bem-sucedido
+                        mensagemDiv.className = 'message success';
                         limparFormulario();
                     } else {
                         mensagemDiv.textContent = `Erro ao enviar formulário: ${result.message || JSON.stringify(result)}`;
-                        mensagemDiv.className = 'message error'; // Adiciona classe de erro
+                        mensagemDiv.className = 'message error';
                     }
                 } else {
-                    // Erro no lado do servidor (ex: 400, 500)
                     mensagemDiv.textContent = `Erro HTTP (${response.status}) ao enviar formulário: ${result.message || JSON.stringify(result)}`;
                     mensagemDiv.className = 'message error';
                 }
-
             } catch (error) {
                 console.error('Erro ao enviar formulário:', error);
                 mensagemDiv.textContent = `Erro ao enviar formulário: ${error.message || error}`;
