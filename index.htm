@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -120,13 +121,14 @@
             font-family: 'Segoe UI', sans-serif;
             font-size: 14px;
         }
-        /* ALTERAÇÃO AQUI: CSS para o crescimento automático */
-        .acao-individual textarea {
-            resize: none; /* Remove a alça de redimensionamento manual */
-            overflow-y: hidden; /* Esconde a barra de rolagem que pode aparecer brevemente */
-            min-height: 38px; /* Altura inicial similar a um input */
-            line-height: 1.4;
-        }
+        /* VERSÃO CORRIGIDA */
+.acao-individual textarea {
+    resize: none;
+    /* overflow-y: hidden; */ /* <-- REMOVA ou comente esta linha */
+    min-height: 38px;
+    line-height: 1.4;
+    overflow-wrap: break-word; /* Adicione para garantir a quebra de linha correta */
+}
         .acao-individual button {
             background: #e3342f;
             color: white;
