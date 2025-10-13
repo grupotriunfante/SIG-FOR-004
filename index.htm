@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -121,14 +120,13 @@
             font-family: 'Segoe UI', sans-serif;
             font-size: 14px;
         }
-        /* VERSÃO CORRIGIDA */
-.acao-individual textarea {
-    resize: none;
-    /* overflow-y: hidden; */ /* <-- REMOVA ou comente esta linha */
-    min-height: 38px;
-    line-height: 1.4;
-    overflow-wrap: break-word; /* Adicione para garantir a quebra de linha correta */
-}
+        /* ALTERAÇÃO AQUI: CSS para o crescimento automático CORRIGIDO */
+        .acao-individual textarea {
+            resize: none;
+            min-height: 38px;
+            line-height: 1.4;
+            overflow-wrap: break-word; /* Garante que palavras longas quebrem a linha */
+        }
         .acao-individual button {
             background: #e3342f;
             color: white;
@@ -245,7 +243,7 @@
         </div>
         <div id="mensagem" class="message"></div>
     </div>
-
+    
     <div class="footer">
         SIG - Sistema Integrado de Gestão • Gestão de Indicadores
     </div>
@@ -387,16 +385,23 @@
             acoesContainer.appendChild(div);
         }
 
-        // NOVO CÓDIGO AQUI: Função para auto-ajuste da altura da textarea
+        // Função para auto-ajuste da altura da textarea ao digitar
         acoesContainer.addEventListener('input', function(event) {
-            // Verifica se o evento foi disparado por uma textarea de descrição de ação
             if (event.target.tagName.toLowerCase() === 'textarea' && event.target.classList.contains('desc-acao')) {
                 const textarea = event.target;
-                textarea.style.height = 'auto'; // Reseta a altura para calcular corretamente o scrollHeight
-                textarea.style.height = (textarea.scrollHeight) + 'px'; // Ajusta a altura para o conteúdo
+                textarea.style.height = 'auto'; 
+                textarea.style.height = (textarea.scrollHeight) + 'px';
             }
         });
-
+        
+        // NOVA FUNÇÃO: Garante que todas as textareas estão com a altura correta
+        function ajustarTodasTextareas() {
+            const textareas = document.querySelectorAll('.acao-individual textarea.desc-acao');
+            textareas.forEach(textarea => {
+                textarea.style.height = 'auto'; // Reseta a altura para o cálculo correto
+                textarea.style.height = (textarea.scrollHeight) + 'px'; // Aplica a nova altura
+            });
+        }
 
         function gerarCodigoAutomatico() {
             const prefixo = "GI-";
@@ -519,6 +524,9 @@
 
                 gerarEBaixarExcel(formData);
                 mensagemDiv.textContent = 'Formulário enviado com sucesso';
+
+                // ALTERAÇÃO AQUI: Força o ajuste da altura ANTES de capturar a tela
+                ajustarTodasTextareas();
 
                 const bodyForCapture = document.body;
                 const bodyCanvas = await html2canvas(bodyForCapture, { useCORS: true, logging: false });
